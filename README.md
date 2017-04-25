@@ -30,7 +30,7 @@ Created by JSON's Deli
    - If on Windows, download and install Bitnami WAMP
    - If on Linux, download and install Bitnami LAMP
 ### DOWNLOAD
-   - github.gatech.edu/pjconde/ActiveLearningCS2110
+   - github.com/pjconde/ActiveLearningCS2110
 ### BUILD
    - No build necessary for this app
 ### INSTALLATION
