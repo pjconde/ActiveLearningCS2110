@@ -22,6 +22,7 @@ Created by JSON's Deli
    - Georgia Tech CAS Integration not functional
    - Georgia Tech virtual machine hosting not completed
    - Professor can only log in with one username/ professor cannot register
+   - Some questions showing up with one response option even after adding multiple
 
 ## Instalation Guide
 ### PRE-REQUISITES
