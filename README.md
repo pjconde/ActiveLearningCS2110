@@ -36,13 +36,13 @@ Created by JSON's Deli
 ### INSTALLATION
    - Navigate to where MAMP/LAMP/WAMP installed using your folder navigator of choice
    - Navigate to the apache2/htdocs file directory
-   - Copy the ActiceLearning2110 folder into htdocs
+   - Copy the ActiceLearningCS2110 folder into htdocs
 ### RUNNING APPLICATION
    - Launch the MAMP/WAMP/LAMP configurator
    - Click on Manage Services
    - Select Apache Web Server and click on Start
    - Open your browser of choice 
-   - Enter 127.0.0.1/ActiveLearning2110/ as a web address
+   - Enter 127.0.0.1/ActiveLearningCS2110/ as a web address
    - If you want to log in as a professor use username: professor passoword: gatech
    - If you want to log in as a student, your username must have been added by a professor, and you must register first
 ### TROUBLESHOOTING
