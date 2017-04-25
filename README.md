@@ -17,6 +17,7 @@ Created by JSON's Deli
    - Student and Professor interaction now available through Server Sent Events
 ### KNOWN BUGS
    - When running locally, student and professor questions error when page is refreshed
+   - Professor cannot show/hide questions on a student's device
    - Timer does not shut off student answers from being input
    - Georgia Tech CAS Integration not functional
    - Georgia Tech virtual machine hosting not completed
