@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Active Learning - Question Sets</title>
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="../scripts.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    </head>
+
+    <body>
+
+        <script>
+            printHeaderProf();
+
+            $('#qSets').css("background-color", "rgb(17, 74, 123)")
+                    .css("border-color", "rgb(17, 74, 123)")
+                    .css("color", "white");
+
+        </script>
+
+        <div class="page-wrap">
+            <div class="panel-group sets hidden display select" role="tablist" id="setTable" aria-multiselectable="true">
+                <h1>Your question sets:</h1>
+
+            </div>
+
+            <div class="btn-set">
+                <a href="newset.html" class="btn btn-primary btn-set" role="button" id="createset1">Create a new question set</a>
+            </div>
+        </div>
+
+        <footer class="footer">
+        </footer>
+
+        <script>
+            $('#createset1').click(function() {
+                localStorage.setItem("set_title", "");
+            });
+
+            $(document).ready(function() {
+                checked = 0;
+                $.ajax({
+                    type: "GET",
+                    url: "../databasehelper.php",
+                    data: "function=getAllSets",
+                    dataType:"json",
+                    error: function(req, err){ console.log('ERROR ' + err)},
+                    success: function (data) {
+                        if(data){
+                            var len = data.length;
+                            var txt = "";
+                            var title = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading';
+                            var sessionButton =
+                                  '" class="start-session btn btn-success" href="questions.html" role="button">Start as Session</a>';
+                            var editButton =
+                                  '" class="edit-set btn btn-link" href="set_manager.html" role="button">Edit Question Set</a>';
+                            console.log(data);
+                            if(len > 0){
+                                for(var i = 0; i < len; i++){
+                                  txt += title + i + '">'
+                                  txt += '<h4 class="panel-title">' + data[i]['set_title'] + '</h4></div>';
+                                  txt += '<div id="collapse' + i + '" class="panel-collapse" role="tabpanel" aria-labelledby="heading' + i + '">';
+                                  txt += '<div class="panel-body set-desc"><div class="btn-set-panel">';
+                                  txt += '<a value="' + data[i]['set_title'] + '" id="' + data[i]['setID'] + sessionButton;
+                                  txt += '<a value="' + data[i]['set_title'] + editButton;
+                                  txt += '</div></div></div></div>';
+                                }
+                                if(txt != ""){
+                                  $("#setTable").append(txt).removeClass("hidden");
+
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            $(document).on("click",'.edit-set', function() {
+                var title = $(this).attr('value');
+                localStorage.setItem("setTitle", title);
+            });
+
+            $(document).on("click",'.start-session', function() {
+                generateSessionID();
+                var title = $(this).attr('value');
+                localStorage.setItem("setTitle", title);
+                var id = $(this).attr('id');
+                console.log(id);
+                localStorage.setItem("setID", id);
+                localStorage.setItem('curQ',0);
+            });
+
+        </script>
+
+    </body>
+
+</html>

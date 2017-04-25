@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<!-- testing sse file for showing events on student side -->
+
+<html lang="en">
+
+	<head>
+		<title id="curQ">Active Learning - Questions</title>
+		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../scripts.js"></script>
+		<script type="text/javascript" src="../bower_components/eventsource-polyfill/dist/eventsource.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+	</head>
+
+	<body>
+		<script>
+			printHeaderStudent();
+		</script>
+
+
+    <div id="result" class="page-wrap"></div>
+
+		<footer class="footer">
+		</footer>
+
+    <script type="text/javascript">
+      // IIFE
+      // Immedietly invoked function expression scope
+      // passing jQuery
+      ( function ( $ ) {
+          // When document ready
+          $( function () {
+            // check for browser support
+            // for even source features
+            if ( typeof( EventSource ) !== "undefined" ) {
+              // create event source
+              var src = new EventSource("../serverSent.php");
+              // trigger message handler
+              // if new data received
+              src.addEventListener( 'message', function ( e ) {
+                // anyway append into page
+                // for user view
+								var msg = $.parseJSON(e.data);
+								var QID = msg[0]['curQ'];
+								$( '#result' ).append( QID + '<br/>' );
+              });
+            }
+            else {
+              alert( 'Sorry, your browser did\'t support EventSource Features, Please use Firefox or Chrome' );
+              // if did't support
+              // create an AJAX request
+              // to replace EventSource
+            }
+          });
+        })( jQuery )
+    </script>
+
+  </body>
+
+</html>

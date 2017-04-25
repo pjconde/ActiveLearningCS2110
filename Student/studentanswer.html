@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+	<title id="curQ">Active Learning - Questions</title>
+	<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+	<script type="text/javascript" src="../bower_components/eventsource-polyfill/dist/eventsource.js"></script>
+	<script type="text/javascript" src="../scripts.js"></script>
+	<script src="../bootstrap/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../stylesheet.css">
+	<script src="../Professor/JS/jquery.countdown.js"></script>
+</head>
+
+<body>
+<script>
+	printHeaderStudent();
+	
+	// TODO: get this from session instead
+	var userName = localStorage.getItem('userName');
+
+
+	$(document).ready(function() {
+		checked = 0;
+		var qID = localStorage.getItem('qID');
+		if (qID !== "undefined") {
+
+			if (qID < 0) {
+				alert("This session has ended");
+			} else {
+
+				$.ajax({
+					type: "GET",
+					url: "../databasehelper.php",
+					//data: {"function":"getSetQuestions", 'id':setId},
+					data: {"function":"getQText", 'qid':qID},
+					dataType:"json",
+					error: function(req, err){ console.log('ERROR ' + err)},
+					success: function (data) {
+						if(data) {
+
+							$("div#askQ h1").html(data[0]['Q_Text']);
+
+						}
+					}
+				}); //end ajax 1
+
+
+				$.ajax({
+					type: "GET",
+					url: "../databasehelper.php",
+					data: {"function":"getQResponse", 'id':qID},
+					dataType:"json",
+					error: function(req, err){ console.log('ERROR ' + err)},
+					success: function (data) {
+						if(data) {
+							var len = data.length;
+							var txt = "''";
+							var str = "";
+							if(len > 0) {
+								for(var i = 0; i < len; i++){
+									txt += "<tr><td><h2>" + "<input type='radio'
+										name = 'rdb' value = '" 
+										+ data[i]['choice'] 
+										+ "'></h2></td><td><h2>" 
+										+  data[i]['choice'] + "</h2></td></tr>";
+								}
+								if(txt != ""){
+									$("#answerTable").append(txt).removeClass("hidden");
+								}
+							}
+						}
+					}
+				}); //end ajax 2
+
+			}
+		}
+	}); //end ready function
+</script>
+
+
+
+<br>
+<div class="row-fluid" style="text-align: center">
+	<div id = "askQ" class="col-lg-12">
+		<h1></h1>
+	</div>
+</div>
+<br>
+
+<div class="row" style="text-align: center">
+	<table class="table-striped table-borderless hidden" align="center" id="answerTable">
+	</table>
+</div>
+
+
+
+<form>
+	<div class="btn-set">
+		<h3> Confidence Level:
+			<input type="radio" name="q2" value="1" id="r1a"><label for="q1a">1</label>
+			<input type="radio" name="q2" value="2" id="r2a"><label for="q1a">2</label>
+			<input type="radio" name="q2" value="3" id="r3a"><label for="q1a">3</label>
+			<input type="radio" name="q2" value="4" id="r4a"><label for="q1a">4</label>
+			<input type="radio" name="q2" value="5" id="r5a"><label for="q1a">5</label> </h3>
+		<br>
+		<a type="submit" id= "submit" class="btn btn-primary">Submit Answer </a>
+	</div>
+</form>
+
+
+</body>
+
+<script>
+	( function ( $ ) {
+		// When document ready
+		$( function () {
+			// check for browser support
+			// for even source features
+			if ( typeof( EventSource ) !== "undefined" ) {
+				// create event source
+				var src = new EventSource("../serverSent.php");
+				// trigger message handler
+				// if new data received
+				src.addEventListener( 'message', function ( e ) {
+					// anyway append into page
+					// for user view
+					var msg = $.parseJSON(e.data);
+					var QID = msg[0]['curQ'];
+					localStorage.setItem('qID', QID);
+					location.reload(true);
+				});
+			}
+			else {
+				alert( 'Sorry, your browser did\'t support EventSource Features, Please use Firefox or Chrome' );
+				// if did't support
+				// create an AJAX request
+				// to replace EventSource
+			}
+		});
+	})( jQuery )
+
+	//$(document).ready(function() {
+	$("#submit").click(function (e) {
+		var answerval = $('input:radio[name=rdb]:checked').val();
+		var confidencelevel = $('input:radio[name=q2]:checked').val();
+		if(answerval==undefined || confidencelevel==undefined) {
+			alert('Please select both options!');
+		} else {
+			var userName = 'pruparel3';
+			var qID = localStorage.getItem('qID');
+
+			$.ajax({
+				type: "GET",
+				url: "../studentdatahelper.php",
+				//dataType:"json",
+				data: {"function":"getResponseValue", 'qID':qID},
+				error: function(req, err) {console.log(err);},
+				success: function (data) {
+					len = data.length;
+					var rightchoice = "";
+					if(len > 0) {
+						for(var j = 12; j < len - 3; j++){
+							rightchoice += data[j];
+						}
+					}
+					if (answerval == rightchoice) {
+						var isCorrectval = 1;
+					} else {
+						var isCorrectval = 0;
+					}
+					localStorage.setItem('isCorrectval', isCorrectval);
+				}
+			}); //end ajax1
+			var isCorrectval = localStorage.getItem('isCorrectval');
+
+			var d = new Date();
+			var month = d.getMonth()+1;
+			var day = d.getDate();
+			var date = d.getFullYear() + '-' +
+					((''+month).length<2 ? '0' : '') + month + '-' +
+					((''+day).length<2 ? '0' : '') + day;
+
+			$.ajax({
+				type: "POST",
+				url: "../studentdatahelper.php",
+				data: {function:'insertStudentResponse', 'userName': userName, qID: qID, 'isCorrectval': isCorrectval, 'date':date},
+				success: function (data) {console.log(data);
+					$.ajax({
+						type: "POST",
+						url: "../studentdatahelper.php",
+						data: {function:'insertConfidence', 'userName': userName, 'answerval': answerval, 'confidencelevel': confidencelevel},
+						success: function (data) {
+							console.log(data);
+							alert('Your answer has been submitted');
+							//nextQuestion();
+						},
+						error: function(req, err) {
+							alert('Error!!!');
+							console.log(err);
+						}
+					});
+				},
+				error: function(req, err) {
+					alert('Error!!!');
+					console.log(err);
+				}
+			}); //end ajax2
+		}
+	}); //end onsubmit
+
+</script>
+</html>

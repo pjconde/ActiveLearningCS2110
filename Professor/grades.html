@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Active Learning - Grades </title>
+        <script type="text/javascript" src="js/Chart.bundle.min.js"></script>
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="../scripts.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+        <!-- Bootstrap select for dropdown -->
+        <link rel="stylesheet" href="../bower_components/bootstrap-select/dist/css/bootstrap-select.css">
+        <script src="../bower_components/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+    </head>
+
+    <body>
+      <script>
+          printHeaderProf();
+          $('.navig').css('margin-bottom', '0px');
+
+          hist_labels = ["0-9%","10-19%","20-29%","30-39%","40-49%","50-59%","60-69%","70-79%","80-89%","90-100%"];
+          // data = [20,90,33,5,15,55,4,12,65,46];
+          nums = [0,0,0,0,0,0,0,0,0,0];
+
+          $(document).ready(function() {
+            $.ajax({
+                type: "GET",
+                url: "../studentdatahelper.php",
+                data: {"function":"getGradeDist", 'section':'All'},
+                dataType:"json",
+                error: function(req, err){ console.log('ERROR ' + err)},
+                success: asyncDistBySection
+              });
+            $.ajax({
+                type: "GET",
+                url: "../studentdatahelper.php",
+                data: {"function":"getStudentGrades", 'section':'All'},
+                dataType:"json",
+                error: function(req, err){ console.log('ERROR ' + err)},
+                success: function (data) {
+                    $("#studentTable tbody tr").remove(); // this line empties tbody
+                    if(data){
+                        var len = data.length;
+                        var txt = "";
+                        if(len > 0){
+                            for(var i = 0; i < len; i++){
+                                if(data[i]['userName'] && data[i]['sectionID']){
+                                    txt += "<tr data-value=" + data[i]['userName'] + "><td headers='userName'>" + data[i]['userName'] + "</td><td headers='sectionID'>" + data[i]['sectionID'] + "</td><td headers='percentage'>" + data[i]['percentageCorrect'] + "</td></tr>";
+                                }
+                            }
+                            if(txt != ""){
+                                $("#students").append(txt);
+                                $("#studentTable").removeClass("hidden")
+                            }
+                        }
+                    }
+                }
+            });
+            // Populate select with options of sections
+            $.ajax({
+                type: 'GET',
+                url: '../databasehelper.php',
+                data: {"function":"getSections"},
+                dataType:"json",
+                error: function(req, err) {console.log(err);},
+                success: function(data) {
+                    var len = data.length;
+                    var selectElem = $("#sectionPick");
+                    var options = "";
+                    if (len > 0) {
+                        selectElem.append(new Option("All","All", true, true));
+                        for (var t = 0; t < len; t++) {
+                            if (data[t].sectionID) {
+                                selectElem.append(new Option(data[t].sectionID, data[t].sectionID));
+                            }
+                        }
+                        //$("#reviewChange").removeClass("hidden");
+                        // this line is necessary if the select element is styled with
+                        // bootstrap select
+                        selectElem.selectpicker('refresh');
+                    }
+                }
+            });
+          });
+
+          $('#viewGrades').css("background-color", "rgb(17, 74, 123)")
+                  .css("border-color", "rgb(17, 74, 123)")
+                  .css("color", "white");
+      </script>
+
+      <div class="container-fluid page-wrap" style="margin-top: 50px;">
+      <div class="top-row" style="position:relative;">
+        <div class="col-lg-3 panel" style="width: 25%; right: 2%; float:right;">
+          <div class="container" style="width:100%; height:100%;">
+              <h3> Pick a lecture section </h3>
+              <select id ="sectionPick" class="selectpicker show-tick" title="Choose a section">
+                  <!-- <option selected="seleted">All</option>
+                  <option>A</option>
+                  <option>B</option> -->
+              </select>
+          </div>
+  			</div>
+
+        <div class="gradesGraph" id="chart-container" style="left:2%; width: 70%; margin: 0 auto; float:left;">
+    					<canvas id="grades-chart" width="100%" height="15%"></canvas>
+    		</div>
+
+        <div class="btn-set">
+            <a class="btn btn-primary btn-set" role="button" id="gradeDistButton">View Overall Distribution</a>
+        </div>
+      </div>
+
+      <div class="gradesTable container q-table" style="position:relative; width:100%; left: 0px; right: 0px; overflow-y:scroll; overflow-y:auto;">
+        <table id="studentTable" class="table table-hover table-striped display select" style="table-layout:fixed">
+            <thead style="display: table-header-group">
+                <th id="userName">Student</th>
+                <th id="sectionID">Section</th>
+                <th id="percentage">Percentage</th>
+            </thead>
+            <tbody id="students"></tbody>
+        </table>
+      </div>
+      </div>
+
+      <footer class="footer">
+      </footer>
+
+      <script>
+        drawBarGraph("grades-chart", hist_labels, nums, 0);
+
+        function asyncIndStudentGraph(data) {
+          stud_labels = [];
+          stud_nums = [];
+          if(data){
+              var len = data.length;
+              if(len > 0){
+                for(var i = 0; i < len; i++){
+                    if(data[i]['date'] && data[i]['dailyPercentage']){
+                        stud_labels.push(data[i]['date']);
+                        stud_nums.push(data[i]['dailyPercentage']);
+                    }
+                }
+              }
+          }
+          drawBarGraph("grades-chart", stud_labels, stud_nums, 0);
+        }
+
+        function asyncDistBySection(data) {
+            nums = [0,0,0,0,0,0,0,0,0,0];
+            if(data){
+                var len = data.length;
+                if(len > 0){
+                  for(var i = 0; i < len; i++){
+                      if(data[i]['bucket'] && data[i]['numStudents']){
+                          index = parseInt(data[i]['bucket'].charAt(0));
+                          if (data[i]['bucket'].length == 3) {
+                            index = 9;
+                          }
+                          nums[index] = parseInt(data[i]['numStudents']);
+                      }
+                  }
+                }
+            }
+            drawBarGraph("grades-chart", hist_labels, nums, 0);
+        }
+
+        $(".table").on('click','tr',function(e) {
+          e.preventDefault();
+          var userName = $(this).data('value');
+          $.ajax({
+              type: "GET",
+              url: "../studentdatahelper.php",
+              data: {"function":"getStudentHistogram", 'userName':userName},
+              dataType:"json",
+              error: function(req, err){ console.log('ERROR ' + err)},
+              success: asyncIndStudentGraph
+          });
+        })
+
+        $("#gradeDistButton").on('click',function(e) {
+          e.preventDefault();
+          var section = $('#sectionPick').find("option:selected").text();
+          $.ajax({
+              type: "GET",
+              url: "../studentdatahelper.php",
+              data: {"function":"getGradeDist", 'section':section},
+              dataType:"json",
+              error: function(req, err){ console.log('ERROR ' + err)},
+              success: asyncDistBySection
+          });
+        })
+
+        $('#sectionPick').change(function () {
+            var section = $(this).find("option:selected").text();
+            $.ajax({
+                type: "GET",
+                url: "../studentdatahelper.php",
+                data: {"function":"getStudentGrades", 'section':section},
+                dataType:"json",
+                error: function(req, err){ console.log('ERROR ' + err)},
+                success: function (data) {
+                    $("#studentTable tbody tr").remove(); // this line empties tbody
+                    if(data){
+                        var len = data.length;
+                        var txt = "";
+                        if(len > 0){
+                            for(var i = 0; i < len; i++){
+                                if(data[i]['userName'] && data[i]['sectionID']){
+                                    txt += "<tr data-value=" + data[i]['userName'] + "><td headers='userName'>" + data[i]['userName'] + "</td><td headers='sectionID'>" + data[i]['sectionID'] + "</td><td headers='percentage'>" + data[i]['percentageCorrect'] + "</td></tr>";
+                                }
+                            }
+                            if(txt != ""){
+                                $("#students").append(txt);
+                                $("#studentTable").removeClass("hidden")
+                            }
+                        }
+                    }
+                }
+            });
+            $.ajax({
+                type: "GET",
+                url: "../studentdatahelper.php",
+                data: {"function":"getGradeDist", 'section':section},
+                dataType:"json",
+                error: function(req, err){ console.log('ERROR ' + err)},
+                success: asyncDistBySection
+            });
+        });
+      </script>
+
+    </body>
+</html>

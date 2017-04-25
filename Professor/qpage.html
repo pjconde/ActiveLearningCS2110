@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Active Learning - Questions </title>
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="../scripts.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    </head>
+
+    <body>
+
+        <script>
+            printHeaderProf();
+
+            $(document).ready(function() {
+                $('#setquestion').val(localStorage.getItem("set_question"));
+            });
+
+            $('.navig').css('margin-bottom', '0px');
+
+        </script>
+
+        <div class="page-wrap">
+        <div class="jumbotron set-header set-header-create">
+
+            <div class="set-title">
+                <h2>Create a New Question </h2>
+            </div>
+
+        </div>
+
+        <br>
+        <form method="POST" text-align: center>
+            <div class="set-question set-question-input" style="text-align:center" >
+                        Question: <input id="question" type="text" name="qname" value="" class="text-line" style="text-align: left; color:black">
+            </div>
+
+            <div class="set-title set-title-input">
+                                Answer Choices:
+                                <br><br>
+                                    A: <input type="text" name="A"><br><br>
+                                    B: <input type="text" name="B"><br><br>
+                                    C: <input type="text" name="C"><br><br>
+                                    D: <input type="text" name="D"><br><br>
+                                    E: <input type="text" name="E"><br><br>
+            </div
+            <br>
+            <div class="form-inline" style="text-align: center" >
+                                <label for="exampleSelect2">Which Unit?</label>
+                                <select class="form-control" id="unit" name="unit">
+                                  <option value ="Unit 1">1</option>
+                                  <option value ="Unit 2">2</option>
+                                  <option value ="Unit 3">3</option>
+                                  <option value ="Unit 4">4</option>
+                                  <option value ="Unit 5">5</option>
+                                </select>
+
+
+                                <label for="exampleSelect1">Correct Answer</label>
+                                <select class="form-control" id="correct" name="correct">
+                                  <option value ="1">A</option>
+                                  <option value ="2">B</option>
+                                  <option value ="3">C</option>
+                                  <option value ="4">D</option>
+                                  <option value ="5">E</option>
+                                </select>
+                                <br><br><br>
+                                <button type="submit" class="btn btn-primary">Create Question</button>
+
+            </div>
+            </div>
+        </form>
+        </div>
+
+        <footer class="footer">
+        </footer>
+
+
+
+        <script>
+            var checked;
+            $(document).ready(function() {
+                checked = 0;
+                $.ajax({
+                    type: "GET",
+                    url: "../databasehelper.php",
+                    data: "function=getQuestions",
+                    dataType:"json",
+                    error: function(req, err){ console.log('ERROR ' + err)},
+                    success: function (data) {
+                        if(data){
+                            var len = data.length;
+                            var txt = "";
+                            if(len > 0){
+                                for(var i = 0; i < len; i++){
+                                    if(data[i]['Q_Text'] && data[i]['unitName']){
+                                        txt += "<tr><td>" + data[i]['Q_Text'] + "</td><td>" + data[i]['unitName']+"</td>";
+
+                                    }
+                                }
+                                if(txt != ""){
+                                    $("#qTable").append(txt).removeClass("hidden");
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            $('form').on('submit', function (e) {
+
+
+              var info = $('form').serializeArray();
+
+              var answers = [info[1].value, info[2].value, info[3].value, info[4].value, info[5].value];
+              var correctIndex = parseInt(info[7].value) - 1;
+              var correct = answers.splice(correctIndex, 1)[0];
+              answers.unshift(correct);
+
+              $.ajax({
+                type: 'POST',
+                url: '../databasehelper.php',
+                data: {function: 'insertQuestion', text:info[0].value, unit:info[6].value, answers:answers},
+                success: function (data) {
+                  console.log(data);
+                },
+                error: function(req, err) {console.log(err);}
+              });
+              return confirm('Do you want to save this question?');
+
+            });
+
+
+        </script>
+
+    </body>
+
+</html>

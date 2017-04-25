@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Learning - Join Session</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../scripts.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+</head>
+
+<body>
+
+    <script>
+        printHeaderStudent();
+
+        $('#joinSession').css("background-color", "#337D44")
+                .css("border-color", "#337D44")
+                .css("color", "white");
+    </script>
+
+    <form method="POST" text-align: center>
+      <div class="container">
+          <div align="center" style="margin-top: 30px;">
+              <h1 style="font-size: 50px; font-weight: 700;">Join a Session</h1>
+              <h4>Please enter the session code on the projector:</h4>
+              <br>
+              <div class="form-inline" style="text-align: center; margin-bottom: 20px;">
+                  <input type="number" name="session" id="sessionCode" size="24">
+                  <br>
+                  <div class="btn-set">
+                  <!-- <a onclick="return enterSession();" class="btn btn-primary btn-set" role="button" id="joinsession">Join Session</a> -->
+                  <button type="submit" class="btn btn-primary btn-set">Join Session</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </form>
+
+    <script>
+        $('form').on('submit', function (e) {
+            e.preventDefault();
+            var info = $('form').serializeArray();
+            check = parseInt(info[0].value);
+            $.ajax({
+              type: 'GET',
+              url: '../databasehelper.php',
+              data: {function: 'checkSessionID', id:check},
+              dataType: "json",
+              success: function (data) {
+                if (data.length > 0) {
+                  confirm('Joined Successfully');
+                  window.location.href = 'studentanswer.html';
+                } else {
+                  return confirm("SessionID is incorrect.");
+                }
+              },
+              error: function(req, err) {console.log(err);}
+            });
+
+        });
+    </script>
+</body>
+</html>

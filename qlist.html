@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Learning - View Questions</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../scripts.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+</head>
+
+<body>
+<script>
+    printHeaderProf();
+
+    // $(document).ready(function() {
+    //     $('#settitle').val(localStorage.getItem("set_title"));
+    // });
+
+    $('.navig').css('margin-bottom', '0px');
+
+    $('#viewQs').css("background-color", "rgb(17, 74, 123)")
+            .css("border-color", "rgb(17, 74, 123)")
+            .css("color", "white");
+</script>
+
+<div class="page-wrap">
+    <div class="jumbotron set-header set-header-create">
+        <h2 id="qlistTitle" class="set-manager">View Questions</h2>
+
+    </div>
+
+    <br><br>
+    <div class="container q-table">
+        <table id="qTable" class="table table-hover table-striped hidden display select">
+            <tr>
+                <th>Question</th>
+                <th>Unit</th>
+                <th>Remove</th>
+            </tr>
+        </table>
+
+        <a class="btn btn-default btn-sm btn-set-delete" id="deleteQ" role="button">
+        Remove Question(s) <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+
+        <!-- button to access new question modal -->
+        <a class="btn btn-default add-q" role="button" data-toggle="modal"
+           style="margin-top: 15px;" data-target="#newQ">+ Make a question</a>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="newQ" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Create New Question
+                    </h4>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+
+                    <form id="make-newq" method="POST">
+                        <div class="form-group">
+                            <div class="set-question set-question-input">
+                                <label for="question">Question:</label>
+                                <input type="text" class="form-control" id="question"
+                                       name="qname" value="" placeholder="Enter Question"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="answer">Answer</label>
+                            <input type="text" class="form-control"
+                                   id="answer" name="answer" placeholder="Correct Answer"/>
+                        </div>
+                        <div class="form-group" id="choices">
+                            <label for="choices">Other choices</label>
+                            <input type="text" class="form-control"
+                                   id="choice1" name="choice1" placeholder=""/>
+                            <input type="text" class="form-control"
+                                   id="choice2" name="choice2" placeholder=""/>
+                            <input type="text" class="form-control"
+                                   id="choice3" name="choice3" placeholder=""/>
+                            <input type="text" class="form-control"
+                                   id="choice4" name="choice4" placeholder=""/>
+                        </div>
+
+                        <div class="form-inline">
+                            <label for="exampleSelect2">Which Unit?</label>
+                            <select class="form-control" id="unit" name="unit">
+                                <option value ="Unit 1">1</option>
+                                <option value ="Unit 2">2</option>
+                                <option value ="Unit 3">3</option>
+                                <option value ="Unit 4">4</option>
+                                <option value ="Unit 5">5</option>
+                                <option value ="Unit 6">6</option>
+                                <option value ="Unit 7">7</option>
+                                <option value ="Unit 8">8</option>
+                                <option value ="Unit 9">9</option>
+                                <option value ="Unit 10">10</option>
+                                <option value ="Unit 11">11</option>
+                                <option value ="Unit 12">12</option>
+                                <option value ="Unit 13">13</option>
+                                <option value ="Unit 14">14</option>
+                                <option value ="Unit 15">15</option>
+                                <option value ="Unit 16">16</option>
+                            </select>
+
+                            <!--<label for="exampleSelect1">Correct Answer</label>-->
+                            <!--<select class="form-control" id="correct" name="correct">-->
+                            <!--<option value ="1">A</option>-->
+                            <!--<option value ="2">B</option>-->
+                            <!--<option value ="3">C</option>-->
+                            <!--<option value ="4">D</option>-->
+                            <!--<option value ="5">E</option>-->
+                            <!--</select>-->
+                            <!--<br><br><br>-->
+                            <button type="submit" class="btn btn-primary">Create Question</button>
+
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--<div class="container btn-set create">-->
+        <!--&lt;!&ndash; <a id="createset-button" href="set_manager.html" class="btn btn-success btn-lg" role="button">-->
+            <!--CREATE SET-->
+        <!--</a> &ndash;&gt;-->
+
+        <!--&lt;!&ndash; button to make new set &ndash;&gt;-->
+        <!--<a id="createset-button" class="btn btn-success btn-lg" data-toggle="modal"-->
+           <!--data-target="#newSet" role="button">-->
+            <!--CREATE SET-->
+        <!--</a>-->
+    <!--</div>-->
+
+    <!-- Modal -->
+    <div class="modal fade" id="newSet" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Create Set
+                    </h4>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+
+                    <form id="make-newset" method="POST">
+                        <div class="form-group">
+                            <div class="set-question set-question-input">
+                                <label for="question">Set Title:</label>
+                                <input type="text" class="form-control" id="settitle" name="setname" value="" />
+                            </div>
+                        </div>
+
+                        <div class="form-inline">
+                            <a id="createset" href = "set_manager.html" class="btn btn-primary" role="button">
+                                Create Set
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+</footer>
+
+<script>
+
+    var checked;
+    var questions;
+    var title;
+
+    $(document).ready(function() {
+        checked = 0;
+        $.ajax({
+            type: "GET",
+            url: "../databasehelper.php",
+            data: "function=getQuestions",
+            dataType:"json",
+            error: function(req, err){ console.log('ERROR ' + err)},
+            success: function (data) {
+                if(data){
+                    var len = data.length;
+                    var txt = "";
+                    if(len > 0){
+                        for(var i = 0; i < len; i++){
+                            if(data[i]['Q_Text'] && data[i]['unitName']){
+                                txt += "<tr><td>" + data[i]['Q_Text'] + "</td><td>" + data[i]['unitName']
+                                        + "</td><td>" + "<input type=\'checkbox\' value=" + data[i]['QID']+ "/></td></tr>";
+                            }
+                        }
+                        if(txt != ""){
+                            $("#qTable").append(txt).removeClass("hidden");
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    $('#createset-button').click(function() {
+        questions = [];
+
+        $('#qTable').find('input[type="checkbox"]:checked').each(function() {
+            var qID = $(this).attr('value');
+            questions.push(qID);
+        });
+
+        console.log("Questions in questions: ");
+        console.log(questions);
+
+        // $(document).ready(function() {
+        //     localStorage.setItem("questions", JSON.stringify.(questions));
+        // });
+
+    });
+
+    $('#createset').click(function(e) {
+        title = $('#settitle').val();
+        questionsList = questions;
+
+        console.log("questions in questionsList");
+        console.log(questionsList);
+
+        $.ajax({
+            type: 'POST',
+            url: '../databasehelper.php',
+            data: {function: 'insertSet', title:title, questions:questionsList},
+            success: function (data) {
+                console.log(data);
+            },
+            error: function(req, err) {console.log(err);}
+        });
+        localStorage.setItem('setTitle', title);
+    });
+
+    $('#check').click(function() {
+        if (checked == 0) {
+            $('#q-table-body').css('background-color', '#95d095');
+            checked = 1;
+        } else {
+            $('#q-table-body').css('background-color', '#ffffff');
+            checked = 0;
+        }
+    });
+
+    // this is for the new question modal
+    $('#make-newq').on('submit', function (e) {
+
+        var info = $('form').serializeArray();
+
+        var answers = [info[1].value, info[2].value, info[3].value, info[4].value, info[5].value];
+
+        $.ajax({
+            type: 'POST',
+            url: '../databasehelper.php',
+            data: {function: 'insertQuestion', text:info[0].value, unit:info[6].value, answers:answers},
+            success: function (data) {
+                console.log(data);
+            },
+            error: function(req, err) {console.log(err);}
+        });
+
+        $("#newQ").modal('hide');
+
+        return confirm('Do you want to save this question?');
+    });
+
+    $('.modal').on('hidden.bs.modal', function(){
+        $(this).find('form')[0].reset();
+    });
+
+    $('#deleteQ').click(function(e) {
+        var setID = localStorage.getItem("setID");
+        var questions = [];
+        $('#qTable').find('input[type="checkbox"]:checked').each(function () {
+            var qID = $(this).attr('value');
+            $.ajax({
+                type: 'POST',
+                url: '../databasehelper.php',
+                data: {function: 'deleteQ', qid:qID},
+                error: function(req, err) {console.log(err);},
+                success: function(data) {
+                    location.reload(true);
+                    console.log(data);
+                }
+            });
+        });
+
+    });
+
+    // this is for the new set modal
+    // $('#make-newset').on('submit', function (e) {
+
+    //     var title = $('#settitle').val();
+    //     var questions = [];
+    //     $('#qTable').find('input[type=\"checkbox\"]:checked').each(function() {
+    //         var qID = $(this).attr('value');
+    //         questions.push(qID);
+    //     });
+    //     $.ajax({
+    //         type: 'POST',
+    //         url: '../databasehelper.php',
+    //         data: {function: 'insertSet', title:title, questions:questions},
+    //         success: function (data) {
+    //             console.log(data);
+    //         },
+    //         error: function(req, err) {console.log(err);}
+    //     });
+    //     localStorage.setItem('setTitle', title);
+    // });
+
+</script>
+
+</body>
+
+</html>

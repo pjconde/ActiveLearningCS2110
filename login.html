@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Learning - Home</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="scripts.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+</head>
+
+<body>
+
+<script>
+    printHeaderLanding();
+</script>
+
+<div class="jumbotron" id="login_div">
+    <form  id="loginForm" method="GET">
+        <center><h2>Login to get started</h2>
+            <div style="margin-top: 15px;">
+                <table>
+                    <tr>
+                        <td style="padding: 10px;">Username</td>
+                        <td><input type="text" id="userName" name="userName" required></td>
+                        <td><div id="userError" class="errorText"></div></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px;">Password</td>
+                        <td><input type="password" id="password" name="password" required></td>
+                        <td><div id="passError" class="errorText"></div></td>
+                    </tr>
+                </table>
+                <!--<input type="submit" id="submit" class="btn btn-success btn-lg" role="button" value="Login">-->
+                <!-- <a href="Student/home.html" id="submit" class="btn btn-success btn-lg" role="button">Login</a> -->
+                <button type="submit" class="btn btn-success btn-lg">Login</button>
+            </div>
+        </center>
+    </form>
+</div>
+
+<script>
+  $('form').on('submit', function (event) {
+      event.preventDefault();
+      var userName = $("input#userName").val(); // define username variable
+      if (userName == "") { // if username variable is empty
+          $('#userError').html('Please Insert Your Username'); // printing error message
+      }
+      var password = $("input#password").val(); // define password variable
+      if (password == "") { // if password variable is empty
+          $('#passError').html('Please Insert Your Password'); // printing error message
+      }
+      if (userName == "professor" && password == "gatech"){
+        window.location.href = 'Professor/home.html';
+      }
+
+      $.ajax({ // JQuery ajax function
+          type: "GET", // Submitting Method
+          url: 'studentdatahelper.php', // PHP processor
+          data: {function: 'validateLogin', userName:userName, password:password}, // the data that will be sent to php processor
+          dataType: "json",
+          success: function(data) { // if ajax function results success
+            if (data.length > 0) {
+              window.location.href = 'Student/home.html';
+            } else {
+              alert('Invalid username/password combination!');
+            }
+          },
+          error: function(req, err) {
+            console.log(err);
+          }
+      });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title id="curQ">Active Learning - Questions</title>
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../scripts.js"></script>
+    <script src="../bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    <script src="JS/jquery.countdown.js"></script>
+    <script type="text/javascript" src="js/Chart.bundle.min.js"></script>
+</head>
+
+	<body>
+		<script>
+			printHeaderProf();
+			var qNum = parseInt(localStorage.getItem("curQ"));
+			function prevQuestion() {
+				if (qNum - 1 >= 0) {
+					localStorage.setItem("curQ", qNum - 1);
+					$.ajax({
+						type: 'POST',
+						url: '../studentdatahelper.php',
+						data: {function: 'resetResponseTable'},
+						success: function (data) {
+							location.reload(true);
+						},
+						error: function(req, err) {console.log(err);}
+					});
+				}
+			}
+
+			function nextQuestion() {
+				var max = localStorage.getItem("totalQ");
+				if (qNum + 1 < max) {
+					localStorage.setItem("curQ", qNum + 1);
+					$.ajax({
+						type: 'POST',
+						url: '../studentdatahelper.php',
+						data: {function: 'resetResponseTable'},
+						success: function (data) {
+							location.reload(true);
+						},
+						error: function(req, err) {console.log(err);}
+					});
+
+				}
+			}
+
+			function endSession() {
+					$.ajax({ //sse
+						type: 'POST',
+						url: '../databasehelper.php',
+						data: {function: 'endSession'},
+						success: function (data) {
+						},
+						error: function(req, err) {console.log(err);}
+					});
+					$.ajax({
+						type: 'POST',
+						url: '../studentdatahelper.php',
+						data: {function: 'resetResponseTable'},
+						success: function (data) {
+						},
+						error: function(req, err) {console.log(err);}
+					});
+					return true;
+			};
+			//
+			// $("#endSession").click(function(e){
+			// 		e.preventDefault;
+			// 		$.ajax({ //sse
+			// 			type: 'POST',
+			// 			url: '../databasehelper.php',
+			// 			data: {function: 'endSession'},
+			// 			success: function (data) {
+			// 			},
+			// 			error: function(req, err) {console.log(err);}
+			// 		});
+			// 		$.ajax({
+			// 			type: 'POST',
+			// 			url: '../studentdatahelper.php',
+			// 			data: {function: 'resetResponseTable'},
+			// 			success: function (data) {
+			// 			},
+			// 			error: function(req, err) {console.log(err);}
+			// 		});
+			// 		window.location.href = 'set_manager.html';
+			// 		return false;
+			// });
+
+    var title = localStorage.getItem('setTitle');
+    var questionSet = [];
+    $(document).ready(function () {
+        checked = 0;
+        var setId = localStorage.getItem('setID');
+        var curQuestion = localStorage.getItem('curQ');
+        if (localStorage.getItem('curQ') === "undefined") {
+            localStorage.setItem('curQ', 0);
+        }
+        $("div#qNum h2").html(qNum + 1);
+
+        $.ajax({
+            type: "GET",
+            url: "../databasehelper.php",
+            data: {"function": "getSetQuestions", 'id': setId},
+            dataType: "json",
+            error: function (req, err) {
+                console.log('ERROR ' + err)
+            },
+            success: function (data) {
+                if (data) {
+                    var len = data.length;
+                    localStorage.setItem("totalQ", len);
+                    if (len > 0) {
+                        for (var i = 0; i < len; i++) {
+                            questionSet.push(data[i]);
+                        }
+                    }
+                    var qID = questionSet[curQuestion]['QID'];
+                    //console.log(localStorage.getItem('QID'));
+                    $.ajax({ //sse
+                        type: 'POST',
+                        url: '../databasehelper.php',
+                        data: {function: 'changeQuestion', curQ: qID},
+                        success: function (data) {
+                        },
+                        error: function (req, err) {
+                            console.log(err);
+                        }
+                    });
+                    $("#askQ").html(questionSet[curQuestion]['Q_Text']);
+                    $("#askQ").attr('QID', qID);
+
+                    // call to get responses based on question!!
+                    // to change questions use curQuestion and increment and decrement accordingly
+                    $.ajax({
+                        type: "GET",
+                        url: "../databasehelper.php",
+                        data: {"function": "getQResponse", 'id': qID},
+                        dataType: "json",
+                        error: function (req, err) {
+                            console.log('ERROR ' + err)
+                        },
+                        success: function (data) {
+                            if (data) {
+                                var len = data.length;
+                                var txt = "";
+                                if (len > 0) {
+                                    for (var i = 0; i < len; i++) {
+                                        txt += "<tr><td><h2>" + data[i]['choice'] + "</h2></td></tr>";
+                                    }
+                                    if (txt != "") {
+                                        $("#answerTable").append(txt).removeClass("hidden");
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }); //end ajax1
+    }); //end ready function
+</script>
+
+<div class="page-wrap">
+    <div class="container-fluid controller">
+        <div class="row-fluid">
+            <div class="col-lg-8 col-md-9">
+                <div class="row">
+                    <div class="col-xs-2 col-xs-offset-3" align="center">
+                        <a onclick="prevQuestion()"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                    </div>
+                    <div id="qNum" class="col-xs-2" align="center">
+                        <h2></h2>
+                    </div>
+                    <div class="col-xs-2" align="center">
+                        <a onclick="nextQuestion()"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="controller-content">
+
+                    <div class="row-fluid" style="text-align: center">
+                        <div class="col-lg-12 q-placeholder">
+                            <h1 id="askQ"></h1>
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <div class="row" style="text-align: center">
+                        <table class="table-striped table-borderless hidden" align="center" id="answerTable">
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-3 panel prof-controller">
+
+                <div class="row-fluid" id="tabBtn">
+                    <div style="text-align: center">
+                        Access Code:
+                        <h3><div id="sessionID">Test</div></h3>
+                        <script>getSessionID();</script>
+                    </div>
+                    <!-- <div
+                    style="text-align: center">
+                        Responses:
+                        <h3>0</h3>
+                    </div> -->
+                </div>
+
+                <div class="timer-div">
+                    <div class="row-fluid">
+                        <!-- This is the actual timer -->
+                        <div id="timer" class="time" style="text-align: center">
+                            <span>00 min 00 sec</span>
+                        </div>
+
+                        <!-- Set up the group of buttons -->
+                        <div class="text-center" data-toggle="buttons">
+                            <label class="btn btn-default" id="btn-reset">
+                                <input type="radio" name="options" id="option2" autocomplete="off">
+                                <i class="glyphicon glyphicon-repeat"></i>
+                            </label>
+
+                            <label class="btn btn-default" id="btn-pause">
+                                <input type="radio" name="options" id="option2"
+                                       autocomplete="off">
+                                <i class="glyphicon glyphicon-pause"></i>
+                            </label>
+
+                            <label class="btn btn-default" id="btn-resume">
+                                <input type="radio" name="options" id="option2" autocomplete="off" checked="">
+                                <i class="glyphicon glyphicon-play"></i>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Drop down presets -->
+                    <div class="dropdown text-center" id="tabBtn">
+                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            Timer Select <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu pull-right">
+                            <li><a href="#" onclick="startTimer(30)">00 min 30 sec</a></li>
+                            <li><a href="#" onclick="startTimer(60)">01 min 00 sec</a></li>
+                            <li><a href="#" onclick="startTimer(90)">01 min 30 sec</a></li>
+                            <li><a href="#" onclick="startTimer(120)">02 min 00 sec</a></li>
+                            <li><a href="#" onclick="startTimer(150)">02 min 30 sec</a></li>
+                            <li><a href="#" onclick="startTimer(180)">03 min 00 sec</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+
+                <!-- show answer + end session buttons -->
+                <div class="row-fluid" id="tabBtn">
+                    <!-- opens in new window -->
+                    <!-- <a class="btn btn-default" style="display: block;" href="show_answer.html" role="button">
+            Show Answer
+        </a> -->
+                    <a class="btn btn-default" id="showAnswer" style="display: block;" data-toggle="modal"
+                       data-target="#showResults" role="button">
+                        Show Answer
+                    </a>
+                </div>
+
+                <div class="row-fluid" id="tabBtn">
+                    <a id="endSession" href="set_manager.html" onclick="return endSession();" class="btn btn-default"
+                       style="display: block;" role="button">
+                        End Session
+                    </a>
+										<!-- <a id="endSession" class="btn btn-default" style="display: block;" role="button">
+												End Session
+										</a> -->
+										<!-- <button type="button" id="endSession" class="btn btn-default" style="display: block;">End Session
+										</button> -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="showResults" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <button type="button" class="close"
+                            data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        Results
+                    </h4>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <div id="questionText" class="row-fluid" style="text-align: center;">
+                        <h3>Question</h3>
+                    </div>
+
+                    <!-- <div id="chart-container" style="height: 350px; width: 60%; margin: 0 auto"> -->
+                    <canvas id="bar-chart"></canvas>
+                    <!-- </div> -->
+                    <br>
+
+                    <div class="panel" style="height: 220px; width: 60%; margin: 0 auto">
+                        <h4 style="text-align:center;">Confidence Level</h4>
+                        <canvas id="confidence"></canvas>
+                    </div>
+
+                    <script>
+                        $('#showResults').on('show.bs.modal', function () {
+                            $("div#questionText h3").html($("#askQ", window.parent.document).text());
+                            var qid = parseInt($("#askQ", window.parent.document).attr("QID"));
+                            var labels = [];
+                            var correctAnswer;
+                            data = [20, 60, 33, 5, 15];
+                            confInput = drawResponseCharts("bar-chart", qid, data);
+                            //labels = ["A","B","C","D","E"];
+                            //correctAnswer = 5; //starting from 1, 0 if no correct answer
+                            //drawBarGraph("bar-chart", labels, data, correctAnswer);
+                            confLabel = ["1", "2", "3", "4", "5"];
+                            drawBarGraph("confidence", confLabel, confInput, 0);
+                        })
+                    </script>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default"
+                            data-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end -->
+</div>
+
+	</body>
+
+</body>
+</html>

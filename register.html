@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Learning - Register</title>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="scripts.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+</head>
+
+<body>
+
+<script>
+    printHeaderLanding();
+</script>
+<div class="jumbotron" id="login_div">
+ <form method = "POST">
+  <center><h2>Register</h2></center>
+  <center>
+      <div style="margin-top: 15px;">
+          <table>
+              <tr>
+                  <td style="padding: 10px;">Username</td>
+                  <td><input type="text" id="userName" name="userName" required></td>
+              </tr>
+              <tr>
+                  <td style="padding: 10px;">Password</td>
+                  <td><input type="password" id="password" name="password" required></td>
+              </tr>
+              <tr>
+                  <td style="padding: 10px;">Confirm Password</td>
+                  <td><input id="confirmPassword" type="password" name="comfirmPassword" required></td>
+              </tr>
+          </table>
+
+          <button type="submit" class="btn btn-success btn-lg">Register</button>
+      </div>
+ </form>
+</div>
+<script>
+  $('form').on('submit', function (event) {
+      event.preventDefault();
+      var userName = document.getElementById('userName').value;
+      var password = document.getElementById('password').value;
+      var confirmPass = document.getElementById('confirmPassword').value;
+      //this was already here
+      if (userName.length == 0) {
+          alert("Please input a username");
+      } else if (password.length == 0) {
+          alert("Please input a password");
+      } else if (confirmPass.length == 0) {
+          alert("Please confirmPass");
+      }
+
+      $.ajax({
+          type: 'POST',
+          url: 'studentdatahelper.php',
+          data: {function: 'updatePassword', password:password, userName:userName},
+          success: function (data) {
+            //console.log(data);
+            // location.reload(true);
+            confirm('Password Set!');
+            window.location.href = 'index.php';
+          },
+          error: function(req, err) {
+            console.log(err);
+            alert('Invalid username!');}
+        });
+  });
+</script>
+
+<!--
+<?php
+// define variables and set to empty values
+$userNameErr = $passErr = $confirmPassErr = "";
+$userName = $password = $confirmPassword = "";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+  if (empty($_POST["userName"])) {
+    $userNameErr = "Please enter a username";
+  } else {
+    $name = test_input($_POST["userName"]);
+    // check if name only contains letters and numbers
+    if (!preg_match("[a-zA-Z0-8]*",$userName)) {
+      $nameErr = "Only alphanumeric characters are allowed";
+    }
+  }
+
+  if (empty($_POST["password"])) {
+    $passErr = "Please enter a password";
+  } else {
+    $password = test_input($_POST["password"]);
+    // check if e-mail address is well-formed
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+      $emailErr = "Invalid email format";
+    }
+  }
+
+  if (empty($_POST["confirmPassword"])) {
+    $confirmPassError = "Please confirm your password";
+  } else {
+    $confirmPassword = test_input($_POST["confirmPassword"]);
+  }
+
+
+function test_input($data) {
+  $data = trim($data);
+  $data = stripslashes($data);
+  $data = htmlspecialchars($data);
+  return $data;
+}
+?>-->
+
+</body>
+</html>

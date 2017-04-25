@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<title id="curQ">Active Learning - Review</title>
+		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../scripts.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    </head>
+
+	<body>
+		<script>
+			printHeaderStudent();
+
+			$('#review').css("background-color", "#337D44")
+					.css("border-color", "#337D44")
+					.css("color", "white");
+                    
+			var qNum = parseInt(localStorage.getItem("curQ"));
+			function prevQuestion() {
+				if (qNum - 1 >= 0) {
+					localStorage.setItem("curQ", qNum - 1);
+					location.reload(true);
+				}
+			}
+
+			function nextQuestion() {
+				var max = localStorage.getItem("totalQ");
+				if (qNum + 1 < max) {
+					localStorage.setItem("curQ", qNum + 1);
+					location.reload(true);
+				}
+			}
+
+			var title = localStorage.getItem('setTitle');
+			var questionSet = [];
+			$(document).ready(function() {
+					checked = 0;
+					var setId = localStorage.getItem('setID');
+					var curQuestion = localStorage.getItem('curQ');
+					if (localStorage.getItem('curQ') === "undefined") {
+						localStorage.setItem('curQ', 0);
+					}
+					$("div#qNum h2").html(qNum + 1);
+
+					$.ajax({
+						type: "GET",
+						url: "../databasehelper.php",
+						data: {"function":"getSetQuestions", 'id':setId},
+						dataType:"json",
+						error: function(req, err){ console.log('ERROR ' + err)},
+						success: function (data) {
+							if(data) {
+								var len = data.length;
+								localStorage.setItem("totalQ", len);
+								if(len > 0) {
+									for(var i = 0; i < len; i++){
+									    questionSet.push(data[i]);
+									}
+								}
+								var qID = questionSet[curQuestion]['QID'];
+								//console.log(localStorage.getItem('QID'));
+								$.ajax({ //sse
+										type: 'POST',
+										url: '../databasehelper.php',
+										data: {function: 'changeQuestion', curQ: qID},
+										success: function (data) {
+										},
+										error: function(req, err) {console.log(err);}
+								});
+								$("#askQ").html(questionSet[curQuestion]['Q_Text']);
+								$("#askQ").attr('QID', qID);
+							}
+						}
+					}); //end ajax1
+			}); //end ready function
+		</script>
+
+		<div class="container-fluid">
+			<div class="row-fluid">
+				<div class="col-lg-12">
+					<div class="row">
+						<div class="col-xs-2 col-xs-offset-3" align="center">
+							<a onclick="prevQuestion()"><span class="glyphicon glyphicon-chevron-left"></span></a>
+						</div>
+						<div id = "qNum" class="col-xs-2" align="center">
+							<h2></h2>
+						</div>
+						<div class="col-xs-2" align="center">
+							<a onclick="nextQuestion()"><span class="glyphicon glyphicon-chevron-right"></span></a>
+						</div>
+					</div>
+
+                    <br>
+					<br>
+
+					<div class="row-fluid" style="text-align: center">
+						<div class="col-lg-12">
+							<h1 id = "askQ"></h1>
+						</div>
+					</div>
+
+					<br>
+
+					<div class="row" style="text-align: center">
+						<table class="table-striped table-borderless hidden" align="center" id="answerTable">
+					  </table>
+					</div>
+				</div>
+	</body>
+</html>

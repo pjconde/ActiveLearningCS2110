@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<title id="curQ">Active Learning - Review</title>
+		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../scripts.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+    </head>
+
+	<body>
+		<script>
+			printHeaderStudent();
+
+			$('#review').css("background-color", "#337D44")
+					.css("border-color", "#337D44")
+					.css("color", "white");
+		</script>
+
+		<div class="panel-group sets hidden display select" role="tablist" id="setTable" aria-multiselectable="true">
+            <h1>Available Sets to Review:</h1>
+
+        </div>
+
+        <script>
+            $('#createset1').click(function() {
+                localStorage.setItem("set_title", "");
+            });
+
+            $(document).ready(function() {
+                checked = 0;
+                $.ajax({
+                    type: "GET",
+                    url: "../studentdatahelper.php",
+                    data: {"function":"getReviewSets", "sectionID":"A"},
+                    dataType:"json",
+                    error: function(req, err){ console.log('ERROR ' + err)},
+                    success: function (data) {
+                        console.log(data);
+                        if(data){
+                            var len = data.length;
+                            var txt = "";
+                            var title = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading';
+                            var sessionButton =
+                                  '" class="start-session btn btn-success" href="review_set.html" role="button">Review Set</a>';
+                            if(len > 0){
+                                for(var i = 0; i < len; i++){
+                                  txt += title + i + '">'
+                                  txt += '<h4 class="panel-title">' + data[i]['set_title'] + '</h4></div>';
+                                  txt += '<div id="collapse' + i + '" class="panel-collapse" role="tabpanel" aria-labelledby="heading' + i + '">';
+                                  txt += '<div class="panel-body set-desc"><div class="btn-set-panel">';
+                                  txt += '<a value="' + data[i]['set_title'] + '" id="' + data[i]['setID'] + sessionButton;
+                                  txt += '</div></div></div></div>';
+                                }
+                                if(txt != ""){
+                                  $("#setTable").append(txt).removeClass("hidden");
+
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            $(document).on("click",'.start-session', function() {
+                var title = $(this).attr('value');
+                localStorage.setItem("setTitle", title);
+                var id = $(this).attr('id');
+                localStorage.setItem("setID", id);
+                localStorage.setItem('curQ',0);
+            });
+
+        </script>
+
+
+	</body>
+
+</html>

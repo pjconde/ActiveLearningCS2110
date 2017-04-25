@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Active Learning - Roster </title>
+        <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script type="text/javascript" src="../scripts.js"></script>
+        <script src="../bootstrap/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="../stylesheet.css">
+        <!-- Bootstrap select for dropdown -->
+        <link rel="stylesheet" href="../bower_components/bootstrap-select/dist/css/bootstrap-select.css">
+        <script src="../bower_components/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
+    </head>
+
+    <body>
+
+        <script>
+            printHeaderProf();
+
+            $(document).ready(function() {
+                $('#setquestion').val(localStorage.getItem("set_question"));
+                // Populate select with options of sections in page and modal
+                $.ajax({
+                    type: "GET",
+                    url: "../studentdatahelper.php",
+                    data: {"function":"getAttendance", 'section':"All"},
+                    dataType:"json",
+                    error: function(req, err){ console.log('ERROR ' + err)},
+                    success: function (data) {
+                        $("#studentTable tbody tr").remove(); // this line empties tbody
+                        if(data){
+                            var len = data.length;
+                            var txt = "";
+                            if(len > 0){
+                                for(var i = 0; i < len; i++){
+                                    if(data[i]['userName'] && data[i]['sectionID']){
+                                        txt += "<tr><td headers='userName'>" + data[i]['userName'] + "</td><td headers='sectionID'>" + data[i]['sectionID'] + "</td><td headers='attendance'>" + data[i]['daysResponded'] + "</td><td><input type='checkbox' value =" + data[i]['userName']+ "></td></tr>";
+                                    }
+                                }
+                                if(txt != ""){
+                                    $("#students").append(txt);
+                                    $("#studentTable").removeClass("hidden")
+                                }
+                            }
+                        }
+                    }
+                });
+                $.ajax({
+                    type: 'GET',
+                    url: '../databasehelper.php',
+                    data: {"function":"getSections"},
+                    dataType:"json",
+                    error: function(req, err) {console.log(err);},
+                    success: function(data) {
+                        var len = data.length;
+                        var selectElem = $("#sectionPick");
+                        var studentSection = $("#studentSectionPick");
+                        var options = "";
+                        if (len > 0) {
+                            selectElem.append(new Option("All", "All", true, true));
+                            for (var t = 0; t < len; t++) {
+                                if (data[t].sectionID) {
+                                    selectElem.append(new Option(data[t].sectionID, data[t].sectionID));
+                                    if (t == 0) {
+                                      // make first option in modal as default
+                                      studentSection.append(new Option(data[t].sectionID, data[t].sectionID, true, true));
+                                    } else {
+                                      studentSection.append(new Option(data[t].sectionID, data[t].sectionID));
+                                    }
+                                }
+                            }
+                            $("#reviewChange").removeClass("hidden");
+                            // this line is necessary if the select element is styled with
+                            // bootstrap select
+                            selectElem.selectpicker('refresh');
+                            studentSection.selectpicker('refresh');
+                        }
+                    }
+                });
+            });
+
+            $('.navig').css('margin-bottom', '0px');
+
+            $('#viewRoster').css("background-color", "rgb(17, 74, 123)")
+                    .css("border-color", "rgb(17, 74, 123)")
+                    .css("color", "white");
+        </script>
+
+        <div class="page-wrap">
+            <div class="container">
+                <h2> Pick a lecture section </h2>
+                <select id ="sectionPick" class="selectpicker show-tick" title="Choose a section"></select>
+                <a class="btn btn-primary" role="button" data-toggle="modal"
+                  data-target="#newStudents">+ Add Students</a>
+            </div>
+            <br>
+
+            <div class="container">
+                <table id="studentTable" class="table table-hover table-striped hidden display select" style="table-layout:fixed">
+                    <thead style="display: table-header-group">
+                        <th id="userName">Student</th>
+                        <th id="sectionID">Section</th>
+                        <th id="attendance">Attendance</th>
+                        <th id="removal">Remove</th>
+                    </thead>
+                    <tbody id="students"></tbody>
+                </table>
+                <a class="btn btn-default btn-sm btn-set-delete" id="deleteStudents" role="button">
+                Remove Student(s) <span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="newStudents" tabindex="-1" role="dialog"
+                 aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <button type="button" class="close"
+                               data-dismiss="modal">
+                                   <span aria-hidden="true">&times;</span>
+                                   <span class="sr-only">Close</span>
+                            </button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Add New Students
+                            </h4>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="modal-body">
+                          <select id ="studentSectionPick" class="selectpicker show-tick" title="Choose a section"></select>
+                        <br></br>
+                            <form method="POST" id = "addStudentForm">
+                              <div class="form-group" id="usernames">
+                                <label for="usernames">Usernames</label>
+                                <input type="text" class="form-control"
+                                    name="name0" placeholder=""/>
+                                <input type="text" class="form-control"
+                                    name="name1" placeholder=""/>
+                                <input type="text" class="form-control"
+                                    name="name2" placeholder=""/>
+                                <input type="text" class="form-control"
+                                    name="name3" placeholder=""/>
+                                <input type="text" class="form-control"
+                                    name="name4" placeholder=""/>
+                              </div>
+
+                              <div class="form-inline">
+                                <button type="button" onclick="addInputs()" class="btn btn-secondary">Add more</button>
+                                <button type="submit" class="btn btn-primary">Finalize to Roster</button>
+                              </div>
+
+                            </form>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default"
+                                    data-dismiss="modal">
+                                        Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end -->
+        </div>
+
+        <footer class="footer">
+        </footer>
+
+        <script>
+            function addInputs(){
+                  var container = document.getElementById("usernames");
+                  var num = container.getElementsByTagName('input').length;
+                  for (i=0;i<5;i++){
+                      var input = document.createElement("input");
+                      input.type = "text";
+                      input.className = "form-control";
+                      input.name = "name" + (i + num);
+                      container.appendChild(input);
+                  }
+            }
+
+            //submits addStudent modal
+            $("#addStudentForm").submit(function(e) {
+                e.preventDefault();
+                //disables empty inputs so they won't submit
+                $("#usernames").find(":input").filter(function () {
+                    return !this.value;
+                }).attr("disabled", true);
+
+                var usernames = $(this).serializeArray();
+                var sectionID = $("#studentSectionPick").find("option:selected").text();
+
+                $.ajax({
+                  type: 'POST',
+                  url: '../databasehelper.php',
+                  data: {function: 'insertStudents', usernames:usernames, sectionID:sectionID},
+                  success: function (data) {
+                    console.log(data);
+                    location.reload(true);
+                  },
+                  error: function(req, err) {console.log(err);}
+                });
+
+                $("#newStudents").modal('hide');
+            });
+
+            $('#deleteStudents').click(function(e) {
+                var usernames = [];
+                $('#studentTable').find('input[type="checkbox"]:checked').each(function () {
+                    var username = $(this).attr('value');
+                    usernames.push(username);
+                });
+                $.ajax({
+                    type: 'POST',
+                    url: '../databasehelper.php',
+                    data: {function: 'deleteStudent', usernames:usernames},
+                    error: function(req, err) {console.log(err);},
+                    success: function(data) {
+                        location.reload(true);
+                        console.log(data);
+                    }
+                });
+            });
+
+            $('#sectionPick').change(function () {
+                var section = $(this).find("option:selected").text();
+                $.ajax({
+                    type: "GET",
+                    url: "../studentdatahelper.php",
+                    data: {"function":"getAttendance", 'section':section},
+                    dataType:"json",
+                    error: function(req, err){ console.log('ERROR ' + err)},
+                    success: function (data) {
+                        $("#studentTable tbody tr").remove(); // this line empties tbody
+                        if(data){
+                            var len = data.length;
+                            var txt = "";
+                            if(len > 0){
+                                for(var i = 0; i < len; i++){
+                                    if(data[i]['userName'] && data[i]['sectionID']){
+                                      txt += "<tr><td headers='userName'>" + data[i]['userName'] + "</td><td headers='sectionID'>" + data[i]['sectionID'] + "</td><td headers='attendance'>" + data[i]['daysResponded'] + "</td><td><input type='checkbox' value =" + data[i]['userName']+ "></td></tr>";
+                                    }
+                                }
+                                if(txt != ""){
+                                    $("#students").append(txt);
+                                    $("#studentTable").removeClass("hidden")
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            //reset number of inputs in modal
+            $('.modal').on('hidden.bs.modal', function(){
+                $(this).find('form')[0].reset();
+                var container = $(this).find('usernames');
+                $("#usernames").html('<label for="usernames">Usernames</label>'+
+                '<input type="text" class="form-control"' +
+                    'id="name0" name="name0" placeholder=""/>'+
+                '<input type="text" class="form-control"'+
+                    'id="name1" name="name1" placeholder=""/>'+
+                '<input type="text" class="form-control"'+
+                    'id="name2" name="name2" placeholder=""/>'+
+                '<input type="text" class="form-control"'+
+                    'id="name3" name="name3" placeholder=""/>'+
+                '<input type="text" class="form-control"'+
+                    'id="name4" name="name4" placeholder=""/>');
+            });
+        </script>
+
+    </body>
+
+</html>

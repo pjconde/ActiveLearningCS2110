@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<title>Active Learning - Show Answer</title>
+    	<script type="text/javascript" src="js/Chart.bundle.min.js"></script>
+		<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../scripts.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../stylesheet.css">
+	</head>
+
+	<body>
+		<script>printHeaderProf();</script>
+
+		<div class="page-wrap">
+			<div class="row-fluid" style="text-align: center;">
+					<h3>How do you set a bit?</h3>
+			</div>
+
+			<!-- back button for use in initial demo - not needed in final product, will be popup -->
+			<div class="col-lg-3 panel" style="position: absolute; top: 25%; right: 2%;">
+				<div class="row-fluid" id="tabBtn">
+					<a class="btn btn-default" style="display: block;" href="questions.html" role="button">
+													Back to Session
+											</a>
+				</div>
+				<h4 style="text-align:center;">Confidence Level</h4>
+				<canvas id="confidence"></canvas>
+			</div>
+
+		<div id="chart-container" style="height: 350px; width: 60%; margin: 0 auto">
+					<canvas id="bar-chart"></canvas>
+		</div>
+			</div>
+
+		<script>
+			labels = ["A","B","C","D","E"];
+			data = [20, 60, 33, 5, 15];
+			correctAnswer = 5; //starting from 1, 0 if no correct answer
+			drawBarGraph("bar-chart", labels, data, correctAnswer);
+			confLabel = ["1", "2", "3", "4", "5"];
+			confInput = [2, 10, 15, 55, 30];
+			drawBarGraph("confidence", confLabel, confInput, 0);
+		</script>
+
+  </body>
+</html>
